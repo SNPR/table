@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import "./App.css";
 
 class App extends React.Component {
@@ -6,16 +6,18 @@ class App extends React.Component {
     super();
     this.state = { data: null };
   }
+
   componentDidMount() {
-    let request = new XMLHttpRequest();
-    request.open("GET", "http://www.filltext.com/?rows=10&fname={firstName}&lname={lastName}&tel={phone|format}&city={city}", true);
-    request.onreadystatechange = () => {
-      if (request.readyState !== 4 || request.status !== 200) return;
-      var data = JSON.parse(request.responseText);
-      this.setState({ data });
-    };
-    request.send();
+    async function getData() {
+      let response = await fetch(
+        "http://www.filltext.com/?rows=10&fname={firstName}&lname={lastName}&tel={phone|format}&city={city}"
+      );
+      let data = await response.json();
+      return data;
+    }
+    getData().then(data => this.setState({ data }));
   }
+
   render() {
     let component = null;
     if (!this.state.data) {
@@ -23,21 +25,25 @@ class App extends React.Component {
     } else {
       component = (
         <table className="test-task-table">
-        <caption>Таблица с тестовыми данными, подтянутыми с filltext.com</caption>
-          <tr>
-            <th>Имя</th>
-            <th>Фамилия</th>
-            <th>Телефон</th>
-            <th>Город</th>
-          </tr>
-          {this.state.data.map((entry, i) => (
+          <caption>
+            Таблица с тестовыми данными, подтянутыми с filltext.com
+          </caption>
+          <tbody>
             <tr>
-              <td key={i}>{entry.fname}</td>
-              <td key={i}>{entry.lname}</td>
-              <td key={i}>{entry.tel}</td>
-              <td key={i}>{entry.city}</td>
+              <th>Имя</th>
+              <th>Фамилия</th>
+              <th>Телефон</th>
+              <th>Город</th>
             </tr>
-          ))}
+            {this.state.data.map((entry, i) => (
+              <tr key={i}>
+                <td key={entry.id}>{entry.fname}</td>
+                <td key={entry.id}>{entry.lname}</td>
+                <td key={entry.id}>{entry.tel}</td>
+                <td key={entry.id}>{entry.city}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       );
     }
